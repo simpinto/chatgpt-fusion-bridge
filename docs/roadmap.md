@@ -10,10 +10,11 @@ Unchecked items are planned, not completed.
 
 ## 2. Prove the desktop connection
 
-- [ ] Confirm the Fusion MCP option exists and enable it.
-- [ ] Configure the local OpenAI client.
-- [ ] Discover tools and record their supported operations.
-- [ ] Read the active document and capture a view.
+- [x] Confirm Fusion MCP is available (already enabled on the test machine).
+- [x] Configure the local OpenAI client and verify native tools after restart.
+- [x] Discover tools and record the initial tested read operations.
+- [x] Read the active document and inspect its empty design state.
+- [ ] Capture a view.
 
 Success: a documented read operation succeeds through the actual connection.
 

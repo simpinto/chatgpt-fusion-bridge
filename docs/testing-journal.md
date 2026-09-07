@@ -48,3 +48,7 @@ Documentation was reviewed and two possible connection approaches were identifie
 - Outcome: passed / partial / failed / not tested
 
 Never include API keys, passwords, private account identifiers, or confidential designs. A screenshot alone is not evidence that all dimensions are correct; record independent measurements where relevant.
+
+## 2026-09-06 — Modeling milestone
+
+Created a flat mounting plate, verified a 4-to-6 mm thickness change, exported STEP/F3D and a viewport image, and reimported STEP with matching measured geometry. See [full report and recovery finding](first-modeling-test.md). F3D reopening and cloud save were not tested.

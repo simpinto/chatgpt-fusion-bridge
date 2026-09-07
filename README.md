@@ -4,7 +4,9 @@ A community effort to make Autodesk Fusion accessible through OpenAI tools, with
 
 ## Current status
 
-**Native Codex-to-Fusion read-only connection verified after restart.** Direct MCP calls listed the open document, inspected the active command, queried API documentation, and executed a read-only inspection script. Fusion reported version 2705.1.11 and an empty design. Modeling, screenshots, saving, and exports remain unverified. This repository currently contains documentation, not an installable plug-in.
+**First native modeling and STEP round-trip test passed.** Created a flat mounting plate, changed thickness from 4 to 6 mm, verified dimensions and volume, exported STEP and F3D, and reimported STEP with matching geometry. [Read the test report](docs/first-modeling-test.md).
+
+This is an early demonstration on one machine, not an installable plugin. Only thickness is parameterized; independent repeatability and browser access remain untested.
 
 ## Why this project exists
 

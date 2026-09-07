@@ -13,148 +13,253 @@ Documentation was reviewed and two possible connection approaches were identifie
 - Tool discovery: succeeded. Advertised tools included `fusion_mcp_read`, `fusion_mcp_execute`, `fusion_mcp_update`, and `fusion_mcp_electronics_read`.
 - Read test: `fusion_mcp_read` with `{"queryType":"document","operation":"open"}` succeeded and reported one active, unmodified, unsaved document.
 - An initial HTTP GET returned 405; JSON-RPC POST requests succeeded. A rejected GET alone does not establish that the server is unavailable.
-- No design changes, screenshot capture, saves, or exports were performed.
-- Added a persistent `mcp_servers.fusion` entry using the local endpoint and a 120-second tool timeout. Restart/native tool discovery remained to be verified.
-- Outcome: transport, discovery, and one read operation passed. Full client integration remained partial at this point.
+- Added a persistent `mcp_servers.fusion` entry using the local endpoint and a 120-second tool timeout.
+- Outcome: transport, discovery, and one read operation passed.
 
 ## 2026-09-06 — Native desktop connection passed after restart
 
-- The user restarted Codex while Fusion remained open.
-- Fusion tools were present in the native tool catalog and invoked directly; no PowerShell HTTP fallback was used for these tests.
-- Open-document query: succeeded; one active, unmodified, unsaved document.
-- Active-command query: default Select command; no interactive command dialog reported.
-- API documentation query: succeeded.
-- Read-only script: succeeded and reported Fusion version 2705.1.11, a Fusion design, zero root bodies, zero root sketches, and zero component occurrences.
-- No geometry changes, screenshots, saves, or exports were performed.
-- Outcome: native discovery, read calls, documentation access, and read-only script execution passed.
+- Fusion tools were present in the native Codex tool catalog and invoked directly.
+- Open-document, active-command, API-documentation, and read-only script checks succeeded.
+- Fusion version reported: 2705.1.11.
+- Outcome: native discovery and read-only execution passed.
 
 ## 2026-09-06 / 2026-09-07 — CWP baseline series
 
-The project adopted bounded **Codex Work Packages (CWPs)**: one objective, one measurable result, explicit acceptance criteria, a maximum two-attempt recovery policy, and a stop condition. The intent is to reduce unnecessary autonomous exploration and improve reproducibility and quota efficiency.
+The project adopted bounded **Codex Work Packages (CWPs)**: one objective, measurable acceptance criteria, explicit stop conditions, limited recovery, and independent verification.
 
 ### CWP-002 — Bracket creation
 
 **Status: PASS**
 
-- A disposable Fusion mounting plate model was created with two through-holes.
-- A named user parameter `plate_thickness` was present.
-- At the start of the later regeneration test, `plate_thickness` was 6 mm.
+- A disposable mounting plate with two through-holes was created.
+- A named `plate_thickness` user parameter existed.
 - Visual evidence confirmed the plate, holes, and parameter table.
-- This test established creation of editable geometry; independent dimensional checks were handled by subsequent CWPs.
 
 ### CWP-003 — Parameter modification and independent verification
 
 **Status: PASS**
 
-- Requested change: `plate_thickness` from 6 mm to 10 mm.
-- Fusion recomputed the model.
-- Independent verification used Fusion's Measure tool on geometry rather than trusting the parameter field alone.
-- Measured distance: **10.00 mm**.
-- Selected vertices showed Z positions of 0.00 mm and 10.00 mm.
-- Outcome: parameter change propagated correctly to BRep geometry.
+- `plate_thickness` changed from 6 mm to 10 mm.
+- Fusion recomputed.
+- Independent geometry measurement verified **10.00 mm** thickness.
 
 ### CWP-004 — Manufacturing interchange: STEP export
 
 **Status: PASS — export artifact structurally verified**
 
-- Export artifact: `outputs/bracket-test/CWP-004-mounting-plate.step`.
-- STEP content identified product `Fusion Bridge - Mounting Plate Test`.
-- Units: millimeters (`SI_UNIT(.MILLI.,.METRE.)`).
-- Geometry envelope in the STEP data was consistent with **60 × 30 × 10 mm**.
-- Hole-center-related geometry was visible near `(10,15)` and `(50,15)` mm.
-- File termination included `END-ISO-10303-21;`.
-- Round-trip readability was intentionally reserved for CWP-005.
+- Artifact: `outputs/bracket-test/CWP-004-mounting-plate.step`.
+- STEP units: millimeters.
+- STEP geometry envelope was consistent with **60 × 30 × 10 mm**.
+- Hole-center-related geometry appeared near `(10,15)` and `(50,15)` mm.
+- File terminated correctly with `END-ISO-10303-21;`.
 
 ### CWP-005 — STEP round-trip verification
 
 **Status: PASS**
 
-Input:
-`outputs/bracket-test/CWP-004-mounting-plate.step`
-
-Verification:
-
-- Fusion STEP `ImportManager` imported the file into a new disposable document.
-- One imported BRep body existed.
-- The body was a valid solid with nonzero volume.
+- Fusion STEP `ImportManager` imported the file into a separate disposable document.
+- One valid solid BRep with nonzero volume was created.
 - Measured dimensions: **60.00 × 30.00 × 10.00 mm**.
-- Hole count: **2**.
-- Hole centers: **(10.00, 15.00)** and **(50.00, 15.00)** mm.
-- Two cylindrical Z-axis through-hole faces were identified.
-- Imported base-feature health: healthy.
-- Geometry integrity: OK.
-- The disposable imported document was named `Untitled`, which was normal for the chosen import path.
-
-This completed the baseline manufacturing-neutral round trip:
-
-**Fusion source → STEP export → new Fusion document → valid BRep → independent geometry verification**.
+- Hole centers: **(10.00,15.00)** and **(50.00,15.00)** mm.
+- Imported base feature was healthy.
 
 ### CWP-006 — Natural-language-to-structured-CAD specification
 
 **Status: PASS**
 
-Natural-language request:
+Natural-language intent was translated into a structured specification for an 80 × 40 × 8 mm plate with two Ø6 mm through-holes at `(15,20)` and `(65,20)` mm. Fusion created a separate solid BRep and independent geometry interrogation confirmed all requested dimensions and hole locations.
 
-> Create a rectangular mounting plate that is 80 mm long, 40 mm wide, and 8 mm thick. Add two 6 mm diameter through-holes. Place both holes on the longitudinal centerline of the plate. The first hole center must be 15 mm from the left edge and the second hole center must be 15 mm from the right edge.
-
-Structured specification:
-
-```yaml
-part:
-  name: CWP-006-mounting-plate
-  units: mm
-
-body:
-  type: rectangular_plate
-  length: 80
-  width: 40
-  thickness: 8
-
-holes:
-  type: through
-  diameter: 6
-  count: 2
-  centers:
-    - [15, 20]
-    - [65, 20]
-```
-
-Specification validation:
-
-- `80 - 15 = 65 mm`.
-- Plate centerline in Y = 20 mm.
-- All requested dimensions and hole locations matched the interpreted structured specification.
-
-Fusion verification:
-
-- Separate disposable document: `CWP-006-mounting-plate`.
-- Valid solid BRep: YES.
-- Length: **80.00 mm**.
-- Width: **40.00 mm**.
-- Thickness: **8.00 mm**.
-- Hole count: **2**.
-- Hole diameter: **6.00 mm**.
-- Hole centers: **(15.00, 20.00)** and **(65.00, 20.00)** mm.
-- Both holes span from Z = 0.00 mm through Z = 8.00 mm.
-- Body has nonzero volume.
-- Fusion features were healthy.
-- Unexpected behavior: none.
-
-This established the first tested abstraction pipeline:
+This established:
 
 **natural language → structured CAD specification → Fusion model → independent BRep verification**.
 
+### CWP-007 — Structured-spec regeneration
+
+**Status: PASS**
+
+The existing CWP-006 model was reused and regenerated from a revised specification rather than rebuilt.
+
+Changes:
+
+- `plate_length`: 80 → 100 mm
+- `plate_width`: 40 → 50 mm
+- `plate_thickness`: 8 → 12 mm
+- `hole_diameter`: 6 → 8 mm
+- hole centers updated to `(20,25)` and `(80,25)`
+
+Verification:
+
+- same original body remained;
+- original sketch and extrusion remained in the timeline;
+- duplicate bodies: none;
+- duplicate parameters: none;
+- final body count: 1;
+- measured geometry: **100 × 50 × 12 mm**;
+- two Ø8 mm through-holes at `(20,25)` and `(80,25)`;
+- relevant features healthy.
+
+This established configuration-driven regeneration of an existing model.
+
+## CWP-008 — Schema-binding attempt and recovery findings
+
+CWP-008 required several bounded attempts before the final intent-based binding passed. The failures are retained because they exposed important Fusion constraint and workflow behavior.
+
+### Initial CWP-008 attempt
+
+**Status: FAIL**
+
+- First blocker: Fusion's Change Parameters dialog was open. No geometry mutation occurred.
+- After the dialog was closed, the first true CAD mutation failed with `VCS_SKETCH_OVER_CONSTRAINTS` while adding a new driving linear distance to already-constrained sketch geometry.
+- Key lesson: do not add parallel driving dimensions before auditing the existing constraint graph.
+
+### Revised CWP-008 preflight
+
+**Status: PRECONDITION FAIL**
+
+The revised procedure stopped before mutation because the active model no longer matched the validated CWP-007 baseline. Residual parameters from the failed binding attempt remained:
+
+- `hole_1_x = 25 mm`
+- `hole_2_x = 75 mm`
+- `hole_centerline_y = 20 mm`
+
+The holes were at `(25,25)` and `(75,25)`. The stop-on-precondition rule prevented further contamination.
+
+### CWP-008R0 — Baseline rollback
+
+**Status: FAIL — partial rollback succeeded, absolute coordinate restoration did not**
+
+Rollback actions:
+
+- restored positional driving-dimension expressions;
+- removed the three residual positional parameters after they became unreferenced;
+- restored the four original core parameters.
+
+Final dimensions remained correct at **100 × 50 × 12 mm**, but hole centers became `(20,30)` and `(80,30)` rather than `(20,25)` and `(80,25)`.
+
+This indicated a coordinate-frame problem rather than an internal dimension problem.
+
+### CWP-008R1 — Coordinate-frame and constraint audit
+
+**Status: PASS — read-only diagnostic**
+
+Observed global bounding box:
+
+- X: 0 → 100 mm
+- Y: 5 → 55 mm
+- Z: 0 → 12 mm
+
+Observed hole centers:
+
+- `(20,30)`
+- `(80,30)`
+
+Edge-relative hole offsets were still correct:
+
+- 20 mm from left/right edges;
+- 25 mm above the lower plate edge.
+
+Constraint audit found:
+
+- lower-left plate corner was at `(0,5)` rather than the sketch origin;
+- no plate corner or rectangle center was anchored to the origin;
+- the sketch was under-constrained;
+- the plate outline and holes could translate together;
+- hole-position dimensions were edge-relative to the lower-left plate corner, not global coordinates.
+
+Diagnosis:
+
+- whole-sketch translation / missing origin anchor;
+- edge-relative hole dimensions;
+- under-constrained sketch allowed solver translation.
+
+No mutations were performed.
+
+### CWP-008R2 — Origin anchor recovery and baseline stabilization
+
+**Status: PASS**
+
+One targeted mutation was performed:
+
+- added one coincident constraint between the existing lower-left plate corner and the existing sketch origin.
+
+Results:
+
+- origin anchor: YES;
+- final bounding box: X 0→100, Y 0→50, Z 0→12 mm;
+- hole centers restored to `(20,25)` and `(80,25)`;
+- final parameters returned to exactly four core parameters;
+- body count remained 1;
+- features remained healthy;
+- whole-sketch translation was eliminated;
+- sketch still reported UNDER-CONSTRAINED, but the translational degree of freedom relevant to this failure was removed.
+
+### CWP-008B — Intent-Based Parameter Binding
+
+**Status: PASS**
+
+The stabilized model was converted from independent coordinate control to semantic design-intent control.
+
+Added semantic parameter:
+
+- `hole_edge_offset = 20 mm`
+
+Existing positional dimensions were rebound in place:
+
+- hole 1 X → `hole_edge_offset`
+- hole 1 Y → `plate_width / 2`
+- hole 2 X → `plate_length - hole_edge_offset`
+- hole 2 Y → `plate_width / 2`
+
+No new driving constraints were added and no over-constraint occurred.
+
+Regeneration Test A:
+
+- changed `hole_edge_offset` 20 → 25 mm;
+- measured hole centers became `(25,25)` and `(75,25)`;
+- plate remained 100 × 50 × 12 mm;
+- Ø8 mm through-hole behavior remained invariant.
+
+Regeneration Test B:
+
+- changed `plate_width` 50 → 60 mm;
+- derived centerline became Y = 30 mm automatically;
+- measured hole centers became `(25,30)` and `(75,30)`;
+- no direct positional sketch edit was required.
+
+Final validated state:
+
+- `plate_length = 100 mm`
+- `plate_width = 60 mm`
+- `plate_thickness = 12 mm`
+- `hole_diameter = 8 mm`
+- `hole_edge_offset = 25 mm`
+- body count = 1
+- origin anchor intact
+- sketch state = UNDER-CONSTRAINED
+- feature health = HEALTHY
+- direct positional sketch editing required for tested layout changes = NO
+
+### Consolidated findings from CWP-008
+
+1. **Preflight failures are not CAD mutation attempts.** Modal dialogs, wrong active documents, and temporary tool blockers must be classified separately from actual modeling failures.
+2. **Read-only diagnostics should not consume the mutation retry budget.** Constraint topology and coordinate-frame audits are often cheaper than trial-and-error edits.
+3. **Do not add redundant driving constraints.** Rebind existing dimensions whenever possible.
+4. **Use a baseline fingerprint before mutation.** Check document, body count, parameter names/count, critical dimensions, origin anchor, and feature health before continuing.
+5. **Separate coordinate frame from design dimensions.** Edge-relative dimensions can remain correct even when an under-constrained sketch translates globally.
+6. **Anchor the model coordinate frame intentionally.** A minimal origin constraint removed the whole-sketch translational freedom without rebuilding the model.
+7. **Prefer semantic design variables over raw coordinates.** `hole_edge_offset` plus derived expressions preserved symmetry and centerline intent more robustly than independent X/Y parameters.
+8. **Mutate incrementally.** Change one driver, recompute, verify health, then continue.
+9. **Preserve failed attempts as engineering evidence.** The recovery sequence materially improved the project's CAD-agent procedure.
+
 ## Current validated capability chain
 
-**CONNECT → CREATE → MODIFY → EXPORT STEP → ROUND-TRIP VERIFY → NATURAL LANGUAGE → STRUCTURED CAD SPECIFICATION → VERIFIED MODEL**
+**CONNECT → CREATE → MODIFY → EXPORT STEP → ROUND-TRIP VERIFY → NATURAL LANGUAGE → STRUCTURED CAD SPECIFICATION → REGENERATE EXISTING MODEL → CONSTRAINT-SAFE INTENT BINDING → VERIFIED MODEL**
 
 ## Next planned test
 
-### CWP-007 — Structured-spec regeneration
+### CWP-009 — Input validation and safe rejection
 
-Test whether a revised structured specification can update an existing parametric Fusion model without rebuilding it from scratch. The regenerated model must then pass independent geometry verification.
-
-The purpose is to prove configuration-driven CAD rather than one-shot model generation.
+Test whether invalid structured specifications are rejected before Fusion mutation. Candidate cases include negative dimensions, impossible hole sizes, out-of-bounds feature locations, and conflicting geometry.
 
 ## Template for future tests
 
@@ -165,7 +270,8 @@ The purpose is to prove configuration-driven CAD rather than one-shot model gene
 - OpenAI client and version:
 - Connection method:
 - Model, if known:
-- Starting document (use a disposable sample):
+- Baseline fingerprint:
+- Starting document:
 - Natural-language request, if applicable:
 - Structured specification, if applicable:
 - Exact execution prompt:
@@ -173,10 +279,13 @@ The purpose is to prove configuration-driven CAD rather than one-shot model gene
 - Actual result:
 - Independent measurements or export checks:
 - Verification method:
-- Evidence (redacted screenshots or public sample files):
+- Evidence:
+- Preflight blockers:
+- Read-only diagnostics:
+- Mutation attempts:
 - Errors and recovery steps:
 - Codex usage/status before and after, when available:
-- Outcome: PASS / PARTIAL / FAIL / NOT TESTED
+- Outcome: PASS / PARTIAL / FAIL / PRECONDITION FAIL / BLOCKED
 
 Never include API keys, passwords, private account identifiers, or confidential designs. A screenshot alone is not evidence that all dimensions are correct; record independent measurements where relevant.
 

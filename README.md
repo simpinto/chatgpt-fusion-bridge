@@ -4,7 +4,7 @@ A community effort to make Autodesk Fusion accessible through OpenAI tools, with
 
 ## Current status
 
-**First local read-only MCP probe passed.** Fusion responded to initialization, tool discovery, and an open-document query from a local HTTP probe. Persistent Codex configuration has been added; native tool loading after restart, modeling, and exports are not yet verified. This repository currently contains documentation, not an installable plug-in.
+**Native Codex-to-Fusion read-only connection verified after restart.** Direct MCP calls listed the open document, inspected the active command, queried API documentation, and executed a read-only inspection script. Fusion reported version 2705.1.11 and an empty design. Modeling, screenshots, saving, and exports remain unverified. This repository currently contains documentation, not an installable plug-in.
 
 ## Why this project exists
 

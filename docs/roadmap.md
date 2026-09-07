@@ -51,30 +51,63 @@ Success: a neutral STEP artifact survives a full Fusion export/import round trip
 
 Success: natural-language design intent is converted into an auditable intermediate specification and then into independently verified Fusion geometry.
 
-## M6 — Configuration-driven regeneration
+## M6 — Configuration-driven regeneration and design intent
 
 ### CWP-007 — Structured-spec regeneration
 
-- [ ] Revise an existing structured specification.
-- [ ] Update the existing parametric Fusion model rather than rebuild it from scratch.
-- [ ] Recompute and independently verify all changed values.
-- [ ] Confirm unchanged design intent remains invariant.
+- [x] Revise an existing structured specification.
+- [x] Update the existing parametric Fusion model rather than rebuild it from scratch.
+- [x] Recompute and independently verify all changed values.
+- [x] Confirm unchanged design intent remains invariant.
 
-Success: configuration changes deterministically regenerate the intended existing model.
+Observed result: the same model/body was reused, four existing parameters were updated, no duplicate bodies or parameters were created, the model regenerated to 100 × 50 × 12 mm with two Ø8 mm through-holes at (20,25) and (80,25), and all relevant features remained healthy.
 
-### CWP-008 — Schema-to-parameter binding
+Success: configuration changes deterministically regenerated the intended existing model.
 
-- [ ] Define explicit mapping between schema fields and Fusion user parameters.
-- [ ] Ensure intended schema variables are not hidden as hard-coded geometry.
-- [ ] Verify each schema change affects only the intended feature or dimension.
+### CWP-008 — Schema-to-parameter binding and recovery sequence
 
-Success: the structured specification has a deterministic parameter interface to Fusion.
+The first direct-binding attempt failed with `VCS_SKETCH_OVER_CONSTRAINTS` when a redundant driving distance was added to an already-constrained sketch. A later preflight also detected residual parameters from the failed attempt and stopped before additional mutation. These failures were preserved as evidence and used to revise the procedure.
+
+Recovery findings:
+
+- [x] Distinguish preflight blockers and read-only diagnosis from true CAD mutation attempts.
+- [x] Restore the original four core parameters after residual CWP-008 state.
+- [x] Audit actual sketch coordinate frame and dimension references read-only.
+- [x] Identify missing origin anchor and whole-sketch translational freedom.
+- [x] Add one coincident constraint from the plate lower-left corner to the sketch origin.
+- [x] Verify whole-sketch translation is eliminated without over-constraining the sketch.
+
+### CWP-008B — Intent-based parameter binding
+
+- [x] Add one semantic parameter: `hole_edge_offset`.
+- [x] Rebind existing positional dimensions instead of adding duplicate driving constraints.
+- [x] Bind hole 1 X to `hole_edge_offset`.
+- [x] Bind hole 2 X to `plate_length - hole_edge_offset`.
+- [x] Bind both hole Y positions to `plate_width / 2`.
+- [x] Verify `hole_edge_offset` 20→25 mm moves holes symmetrically to (25,25) and (75,25).
+- [x] Verify `plate_width` 50→60 mm moves both holes automatically to Y=30 mm.
+- [x] Confirm no direct positional sketch edit is required for these changes.
+- [x] Confirm origin anchor remains intact, body count remains 1, no over-constraint occurs, and features stay healthy.
+
+Current validated final state after CWP-008B:
+
+- `plate_length = 100 mm`
+- `plate_width = 60 mm`
+- `plate_thickness = 12 mm`
+- `hole_diameter = 8 mm`
+- `hole_edge_offset = 25 mm`
+- hole centers = (25,30) and (75,30)
+- one valid solid body
+- origin anchor intact
+- sketch still reported under-constrained, but whole-sketch translation is removed and tested design intent is deterministic
+
+Success: the structured specification now has a deterministic semantic parameter interface to Fusion for the tested mounting-plate layout.
 
 ### CWP-009 — Input validation and safe rejection
 
 - [ ] Reject zero/negative dimensions.
-- [ ] Reject hole centers outside the part.
-- [ ] Reject impossible or conflicting feature requests.
+- [ ] Reject hole centers or derived feature positions outside the part.
+- [ ] Reject impossible hole diameters and geometric conflicts.
 - [ ] Prove invalid input does not modify the Fusion model.
 
 Success: invalid designs fail safely before CAD mutation.

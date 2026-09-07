@@ -25,6 +25,7 @@ For CWP tasks:
 
 - execute only the requested CWP;
 - preserve the stated starting document and unrelated files;
+- verify the expected baseline fingerprint before mutation;
 - use explicit PASS/FAIL criteria;
 - independently verify outputs where possible;
 - stop when the requested objective is complete;
@@ -32,15 +33,68 @@ For CWP tasks:
 
 See `docs/cwp-framework.md`.
 
-## Failure policy
+## Baseline and preflight policy
 
-Use a maximum two-attempt recovery policy unless a task explicitly authorizes more:
+Before a mutation task, confirm enough state to identify the intended known-good model. Depending on the CWP, this may include:
 
-1. Try the obvious safe correction.
-2. Try one reasonable alternative.
-3. If the second attempt fails, stop and document the failure.
+- document name;
+- body count;
+- parameter names/count and critical values;
+- critical dimensions and feature locations;
+- origin/coordinate-frame anchor state;
+- sketch/timeline feature health.
 
-Do not convert a bounded execution task into open-ended experimentation.
+If the starting state materially differs, stop with `PRECONDITION FAIL`. Do not silently recover inside an unrelated task.
+
+Preflight blockers such as modal dialogs, a wrong active document, Fusion busy state, or temporary tool unavailability do not count as CAD mutation attempts.
+
+## Read-only diagnosis
+
+Read-only inspection does not consume the mutation retry budget. Prefer diagnosis before speculative editing when the failure involves:
+
+- sketch over-constraint;
+- uncertain dimension references;
+- unknown coordinate-frame anchoring;
+- parameter conflicts;
+- feature-health uncertainty.
+
+Useful diagnostics include parameter lists, sketch-dimension audits, constraint-topology audits, global bounding boxes, edge-relative measurements, and BRep interrogation.
+
+## Mutation failure policy
+
+Use a maximum of two **targeted CAD mutation attempts** unless a task explicitly authorizes more:
+
+1. Make one planned mutation.
+2. Recompute and verify sketch/feature health immediately.
+3. If it fails, revert that mutation when practical.
+4. Try one reasonable targeted alternative.
+5. If the second true mutation attempt fails, stop and document the failure.
+
+Do not stack multiple speculative changes before checking health. Do not convert a bounded task into open-ended experimentation.
+
+## Constraint-safe CAD rules
+
+- Audit existing driving dimensions and geometric constraints before adding new ones.
+- Prefer rebinding existing dimensions to parameter expressions over adding parallel driving constraints.
+- Distinguish global coordinates from edge-relative or feature-relative dimensions.
+- Intentionally anchor the coordinate frame when absolute placement matters.
+- Do not fully rebuild a sketch merely to bypass an over-constraint problem.
+- If a constrained refactor is genuinely required, preserve/recover the last known-good state and document the reason.
+
+## Design-intent parameterization
+
+Prefer semantic design variables and derived relationships over independent raw coordinates.
+
+Example validated pattern:
+
+```text
+hole_edge_offset = 25 mm
+Hole 1 X = hole_edge_offset
+Hole 2 X = plate_length - hole_edge_offset
+Hole Y   = plate_width / 2
+```
+
+This better preserves symmetry and centerline intent than independent X/Y values.
 
 ## Fusion safety
 
@@ -55,7 +109,7 @@ Do not convert a bounded execution task into open-ended experimentation.
 
 For design-generation tasks, prefer this flow:
 
-**natural language → structured specification → validation → Fusion mutation → independent verification**
+**natural language → structured specification → validation → semantic parameter binding → Fusion mutation → independent verification**
 
 Do not silently invent unspecified manufacturing features, dimensions, materials, tolerances, fillets, chamfers, hardware, or CAM operations.
 
@@ -64,6 +118,7 @@ When a specification is ambiguous or invalid, prefer safe rejection or an explic
 ## Repository discipline
 
 - Preserve historical test reports even when later tests improve the workflow.
+- Preserve failed attempts and recovery findings when they materially improve the procedure.
 - Distinguish documented capability, planned capability, and verified result.
 - Keep test evidence concise and reproducible.
 - Never commit passwords, API keys, account identifiers, credentials, private designs, or confidential customer information.
@@ -75,12 +130,16 @@ For meaningful tests, record:
 
 - objective;
 - environment;
+- baseline fingerprint;
 - prompt/specification;
 - expected result;
 - actual result;
 - independent verification;
+- preflight blockers;
+- read-only diagnostics;
+- mutation attempts;
 - errors/recovery;
-- PASS / PARTIAL / FAIL;
+- PASS / PARTIAL / FAIL / PRECONDITION FAIL / BLOCKED;
 - next bounded milestone.
 
 Use the testing journal as the public record of observed results.

@@ -4,17 +4,19 @@ A community effort to make Autodesk Fusion accessible through OpenAI tools, with
 
 ## Current status
 
-**Core desktop proof-of-concept milestones have passed.** On one Windows test machine, the project has demonstrated:
+**Core desktop proof-of-concept and first design-intent milestones have passed.** On one Windows test machine, the project has demonstrated:
 
 - native Codex access to Autodesk Fusion's local MCP server;
 - creation of a parametric mounting plate in a disposable Fusion document;
 - parameter-driven regeneration with independent geometry verification;
 - STEP export and round-trip reimport as a valid solid BRep;
-- natural-language design intent translated into a structured CAD specification and then executed and independently verified in Fusion.
+- natural-language design intent translated into a structured CAD specification and then executed and independently verified in Fusion;
+- structured-spec regeneration of an existing model without rebuilding it;
+- constraint-safe, intent-based parameter binding using semantic relationships rather than independent raw coordinates.
 
-The current CWP sequence has passed through **CWP-006 — Natural-Language-to-Structured-CAD Specification**. See the [testing journal](docs/testing-journal.md) and [CWP framework](docs/cwp-framework.md).
+The current CWP sequence has passed through **CWP-008B — Intent-Based Parameter Binding**. See the [testing journal](docs/testing-journal.md) and [CWP framework](docs/cwp-framework.md).
 
-This remains an early demonstration on one machine, not an installable plugin or production-qualified CAD/CAM system. Independent repeatability on additional machines, browser access, broader feature coverage, manufacturing rules, and CAM automation remain to be tested.
+This remains an early demonstration on one machine, not an installable plugin or production-qualified CAD/CAM system. Independent repeatability on additional machines, browser access, broader feature coverage, manufacturing rules, validation logic, and CAM automation remain to be tested.
 
 ## Why this project exists
 
@@ -28,15 +30,17 @@ This is an independent community project, not affiliated with or endorsed by Ope
 2. Keep Codex tasks bounded and measurable through Codex Work Packages (CWPs).
 3. Separate planning/research from local execution to reduce wasted agent usage.
 4. Verify generated or modified geometry independently instead of trusting only input parameters.
-5. Preserve tested results in a public journal and checkpoint files.
-6. Add reusable abstractions only after repeated tests demonstrate a real need.
-7. Explore ChatGPT browser access through a secure tunnel only after the local desktop path is stable.
+5. Preserve tested results, failed attempts, and recovery findings in a public journal.
+6. Treat preflight, read-only diagnosis, and CAD mutation as separate phases.
+7. Prefer semantic design variables and derived relationships over independent raw coordinates.
+8. Add reusable abstractions only after repeated tests demonstrate a real need.
+9. Explore ChatGPT browser access through a secure tunnel only after the local desktop path is stable.
 
 ## Validated capability chain
 
-The project has now demonstrated this baseline sequence:
+The project has now demonstrated this sequence:
 
-**CONNECT → CREATE → MODIFY → EXPORT STEP → ROUND-TRIP VERIFY → NATURAL LANGUAGE → STRUCTURED CAD SPECIFICATION → VERIFIED MODEL**
+**CONNECT → CREATE → MODIFY → EXPORT STEP → ROUND-TRIP VERIFY → NATURAL LANGUAGE → STRUCTURED CAD SPECIFICATION → REGENERATE EXISTING MODEL → INTENT-BASED PARAMETER BINDING → VERIFIED MODEL**
 
 ## Read the documentation
 
@@ -49,7 +53,7 @@ The project has now demonstrated this baseline sequence:
 
 ## Next milestone
 
-**CWP-007 — Structured-spec regeneration** will test whether a revised structured specification can update an existing parametric Fusion model, recompute it, and pass independent geometry verification without rebuilding the part from scratch.
+**CWP-009 — Input validation and safe rejection** will test whether invalid structured specifications are rejected before Fusion is mutated. Planned cases include negative dimensions, impossible hole sizes, out-of-bounds feature locations, and conflicting geometry.
 
 ## Participation and licensing
 

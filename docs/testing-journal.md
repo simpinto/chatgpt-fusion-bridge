@@ -18,6 +18,18 @@ Documentation was reviewed and two possible connection approaches were identifie
 - Outcome: transport, discovery, and one read operation passed. Full client integration remains partial.
 - Next: restart the desktop client, verify Fusion tools are loaded, then inspect a disposable design before modeling.
 
+## 2026-09-06 — Native desktop connection passed after restart
+
+- The user restarted Codex while Fusion remained open.
+- Fusion tools were present in the native tool catalog and invoked directly; no PowerShell HTTP fallback was used for these tests.
+- Open-document query: succeeded; one active, unmodified, unsaved document.
+- Active-command query: default Select command; no interactive command dialog reported.
+- API documentation query: succeeded.
+- Read-only script: succeeded and reported Fusion version 2705.1.11, a Fusion design, zero root bodies, zero root sketches, and zero component occurrences.
+- No geometry changes, screenshots, saves, or exports were performed.
+- Outcome: native discovery, read calls, documentation access, and read-only script execution passed. This demonstrates a working local OpenAI-client connection on this machine, not universal compatibility or completed CAD automation.
+- Next milestone: create and validate a simple parametric test part and export.
+
 ## Template for future tests
 
 - Date:
